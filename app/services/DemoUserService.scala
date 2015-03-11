@@ -26,6 +26,7 @@
 
 package services
 
+import org.mindrot.jbcrypt.BCrypt
 import play.api.{Logger, Application}
 import securesocial.core._
 import securesocial.core.providers.{UsernamePasswordProvider, MailToken}
@@ -37,7 +38,27 @@ import org.joda.time.format.{DateTimeFormatter, DateTimeFormat}
 class DemoUserService extends UserService[DemoUser] {
   val logger = Logger("application.controllers.DemoUserService")
 
-  var users = Map[(String, String), DemoUser]()
+  val testUserProfile = BasicProfile(
+    providerId = "userpass",
+    userId = "test@test.com",
+    firstName = None,
+    lastName = None,
+    fullName = None,
+    email = Some("test@test.com"),
+    avatarUrl = None,
+    authMethod = AuthenticationMethod.UserPassword,
+    passwordInfo = Some(
+      PasswordInfo(
+        hasher = "bcrypt",
+        password = BCrypt.hashpw("test", BCrypt.gensalt(10))
+      )
+    )
+  )
+
+  val testUser = DemoUser(testUserProfile, List(testUserProfile))
+
+  var users = Map[(String, String), DemoUser](("userpass", "test") -> testUser)
+
   //private var identities = Map[String, BasicProfile]()
   private var tokens = Map[String, MailToken]()
 
